@@ -63,6 +63,9 @@ into a final **Markdown OSINT Report** that is sent back to the user.
 
 - **User Input Example**  
     ![src/input.png](src/input.png)
-    
-- **Generated Output Example**  
+
+- **Generated Output Example**
     ![src/ouput.png](src/ouput.png)
+
+- **Workflow Example**
+    ![src/workflow.png](src/workflow.png)
