@@ -61,10 +61,8 @@ into a final **Markdown OSINT Report** that is sent back to the user.
 
 ## Screenshots
 
-_Add your screenshots here_
-
 - **User Input Example**  
-    _placeholder_
+    ![[src/input.png]]
     
 - **Generated Output Example**  
-    _placeholder_
+    ![[src/output.png]]
