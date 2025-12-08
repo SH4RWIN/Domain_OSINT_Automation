@@ -65,4 +65,4 @@ into a final **Markdown OSINT Report** that is sent back to the user.
     ![src/input.png](src/input.png)
     
 - **Generated Output Example**  
-    ![src/output.png](src/output.png)
+    ![src/ouput.png](src/ouput.png)
