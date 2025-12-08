@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    environment:
+            - N8N_HOST=localhost
+            - N8N_PORT=5678
+            - N8N_PROTOCOL=${N8N_PROTOCOL:-http} # Set to https if using SSL
+            - N8N_DB_TYPE=sqlite
+            - N8N_DB_SQLITE_FILENAME=/home/node/.n8n/database.sqlite
+            - N8N_SECURE_COOKIE=false
+            - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+            - N8N_EDITOR_BASE_URL=${NGROK_URL}
+            - WEBHOOK_URL=${NGROK_URL}
+            - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+            - GENERIC_TIMEZONE=${TIMEZONE}
+    networks:
+      - n8n-network
+    volumes:
+      - ./.n8n:/home/node/.n8n
+    ports:
+      - "5678:5678"
+
+  ngrok:
+    container_name: ngrok
+    image: ngrok/ngrok:latest
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_TOKEN}
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok.yml"
+    networks:
+      - n8n-network
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+
+volumes:
+  n8n_data:
+
+networks:
+  n8n-network:
+    driver: bridge
