@@ -1,0 +1,731 @@
+{
+  "name": "Domain OSINT",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Subdomains Finder",
+        "height": 208,
+        "width": 1040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -288
+      ],
+      "id": "3cf4a681-62ae-431b-8d43-222059227a16",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/domains/{{ $json.website }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-apikey",
+              "value": "5b6c49eb546cf63b629d62da0de862c4de889d3a940eb4e217950c6a6b2b5d86"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        48
+      ],
+      "id": "4957cb7a-afad-46d9-93c4-8f2723ae7e4b",
+      "name": "VirusTotal Domain Lookup"
+    },
+    {
+      "parameters": {
+        "content": "## Domain Info using VirusTotal API",
+        "height": 416,
+        "width": 1040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -48
+      ],
+      "id": "b193b3fa-5e8d-46fe-963c-2b7bf4e48989",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "7b5ab940-08be-4afc-8b4a-ef926b12748f",
+      "name": "Split Data Array",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        224,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f8a9b1c-2d3e-4f5g-6h7i-8j9k0l1m2n3o",
+              "name": "subdomain",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+              "name": "ip_address",
+              "value": "={{ $json.attributes.last_dns_records.filter(r => r.type === 'A').map(r => r.value).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "q1r2s3t4-u5v6-w7x8-y9z0-a1b2c3d4e5f6",
+              "name": "cname_target",
+              "value": "={{ $json.attributes.last_dns_records.find(r => r.type === 'CNAME')?.value || 'None' }}",
+              "type": "string"
+            },
+            {
+              "id": "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6",
+              "name": "ssl_issuer",
+              "value": "={{ $json.attributes.last_https_certificate.issuer.O }}",
+              "type": "string"
+            },
+            {
+              "id": "w1x2y3z4-a5b6-c7d8-e9f0-g1h2i3j4k5l6",
+              "name": "ssl_expires",
+              "value": "={{ $json.attributes.last_https_certificate.validity.not_after }}",
+              "type": "string"
+            },
+            {
+              "id": "m1n2o3p4-q5r6-s7t8-u9v0-w1x2y3z4a5b6",
+              "name": "malicious_flags",
+              "value": "={{ $json.attributes.last_analysis_stats.malicious }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f20568af-ec76-4071-8ab1-7131048b71be",
+      "name": "Extract Subdomain Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"domain_identity\": {\n    \"domain\": \"brototype.com\",\n    \"registrar\": \"GoDaddy.com, LLC\",\n    \"age_info\": {\n      \"created\": \"11/10/2015\",\n      \"updated\": \"12/3/2025\",\n      \"expiration\": \"11/10/2015\"\n    },\n    \"abuse_contact\": {\n      \"email\": \"trustandsafety@support.aws.com\",\n      \"phone\": \"+1.2024422253\"\n    }\n  },\n  \"hosting_infrastructure\": {\n    \"provider_detected\": \"DigitalOcean\",\n    \"primary_ip\": \"157.245.98.112\",\n    \"nameservers\": [\n      \"ns1.digitalocean.com\",\n      \"ns2.digitalocean.com\",\n      \"ns3.digitalocean.com\"\n    ]\n  },\n  \"technical_contact\": {\n    \"is_redacted\": true,\n    \"organization\": \"Identity Protection Service\",\n    \"city\": \"Hayes\",\n    \"province\": \"Middlesex\",\n    \"postal_code\": \"UB3 9TR\",\n    \"country\": \"GB (Great Britain)\",\n    \"email_proxy\": \"023dbd37a63cce0cs@identity-protect.org\"\n  },\n  \"email_security\": {\n    \"mail_service_provider\": \"Google Workspace\",\n    \"spf_record\": \"v=spf1 include:zcsend.in ~all\",\n    \"third_party_senders\": [\n      \"zcsend.in\"\n    ],\n    \"mx_records\": [\n      \"aspmx.l.google.com\",\n      \"alt1.aspmx.l.google.com\"\n    ]\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        432
+      ],
+      "id": "6b2dc12c-a232-4b04-a066-5f4fc5566809",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        432
+      ],
+      "id": "7885a9ea-4fb5-4436-a576-ca7c5a5c1df1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KAFeUKspyCy3FbpE",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/domains/{{ $('Initiator 1').item.json.website }}/subdomains\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        -240
+      ],
+      "id": "d69b1f3c-a7ed-4f2f-a8bf-390a83062d86",
+      "name": "Virustotal subdomain lookup",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8B1H1YxBN8fkFEdA",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "Note that only domains that has issued SSL can be found in crt.sh, other subdomains that work with just plain HTTP will not be shown here"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93bf6cbf-fa50-479d-b904-e945ea59dac3",
+              "name": "=Domain Information",
+              "value": "={{ $('Context Filter').all() }}",
+              "type": "array"
+            },
+            {
+              "id": "897041dc-0aa9-46ca-a36e-3531037a6b89",
+              "name": "=Subdomains",
+              "value": "={{ $('Extract Subdomain Info').all() }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        48
+      ],
+      "id": "c488c6a9-6b99-49a2-b278-0734168f90e5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Domain Info:\n{{ $json['Domain Name'] }}\n{{ $json['Domain Registrar'] }}\n{{ $json['Domain Creation Date'] }}\n{{ $json['Last Updated'] }}\n{{ $json['Domain Expiration'] }}\n\n# Subdomains\n{{ $json.Subdomains }}\n\nWHOIS Lookup:\n{{ $('VirusTotal Domain Lookup').item.json.data.attributes.whois }}\n\nMX Records:\n{{ $json['MX Records'] }}\n\nA Records:\n{{ $json['A Records'] }}\n\nNS Records:\n{{ $json['NS Records'] }}\n\nTXT Records:\n{{ $json['TXT Records'] }}\n\nCNAME Records:\n{{ $json['CNAME Records'] }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        560,
+        48
+      ],
+      "id": "1408026c-be2c-4bfa-a6c6-37155656a6e5",
+      "name": "Context Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0aac1c00-8968-4c42-ab28-66a0933f7485",
+              "name": "website",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -240
+      ],
+      "id": "a63153b6-8e4d-473a-b74a-d04403214d1c",
+      "name": "Initiator 1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0aac1c00-8968-4c42-ab28-66a0933f7485",
+              "name": "website",
+              "value": "={{ $('Initiator 1').item.json.website }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        48,
+        48
+      ],
+      "id": "dbad97bc-a5af-432c-a4c6-358580cd05ec",
+      "name": "Initiator 2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -240
+      ],
+      "id": "a9175390-c199-4553-b36a-8c6dfd468f37",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1248d9b0-ac60-4db4-815f-459b9c138e67",
+              "name": "Domain Name",
+              "value": "={{ $json.data.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e76a00b9-c930-43aa-801e-23956ae58677",
+              "name": "Domain Registrar",
+              "value": "={{ $json.data.attributes.registrar }}",
+              "type": "string"
+            },
+            {
+              "id": "919b45e1-ac07-49a3-8d89-9e6d3e8d2418",
+              "name": "=Domain Creation Date",
+              "value": "={{ new Date($json.data.attributes.creation_date * 1000).toLocaleString() }}",
+              "type": "string"
+            },
+            {
+              "id": "2d882ce5-5de8-43d4-b7f2-a3d9aa1640a7",
+              "name": "Last Updated",
+              "value": "={{ new Date($json.data.attributes.last_modification_date * 1000).toLocaleString() }}",
+              "type": "string"
+            },
+            {
+              "id": "a95c165a-d0bb-4b02-b3a1-926bd26bfc31",
+              "name": "Domain Expiration",
+              "value": "={{ new Date($json.data.attributes.creation_date * 1000).toLocaleString() }}",
+              "type": "string"
+            },
+            {
+              "id": "7803a788-e67b-406d-8eb2-e9ebfaaa30df",
+              "name": "A Records",
+              "value": "={{ $('ALL Records').item.json.a }}",
+              "type": "array"
+            },
+            {
+              "id": "7dd55b89-5647-4425-96a9-b28317fb5594",
+              "name": "CNAME Records",
+              "value": "={{ $('ALL Records').item.json.cname }}",
+              "type": "array"
+            },
+            {
+              "id": "326f74ea-ab5c-461d-8043-1d66a499fbd0",
+              "name": "NS Records",
+              "value": "={{ $('ALL Records').item.json.ns }}",
+              "type": "array"
+            },
+            {
+              "id": "467c75ba-dc52-4f17-a210-c8bd227c9f68",
+              "name": "TXT Records",
+              "value": "={{ $('ALL Records').item.json.txt }}",
+              "type": "array"
+            },
+            {
+              "id": "0a147385-f991-41ac-9955-537d4ea1ee4b",
+              "name": "MX Records",
+              "value": "={{ $('ALL Records').item.json.mx }}",
+              "type": "array"
+            },
+            {
+              "id": "c12427d8-b78c-4567-bb33-35e3f4238834",
+              "name": "Subdomains",
+              "value": "={{ $('Aggregate').item.json.data }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        48
+      ],
+      "id": "32d90938-93d0-41ec-b00c-62e9fbdaf1f9",
+      "name": "Set3"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.dnsdumpster.com/domain/{{ $('Initiator 1').item.json.website }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "2fbb46ca57eb705af7862621acf5528c9d741abe4c3fa3a0daab30a1c911c7ca"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -144,
+        48
+      ],
+      "id": "8f097f20-710f-4b7a-8fe8-8c5611a40188",
+      "name": "ALL Records"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -624,
+        -240
+      ],
+      "id": "52f35210-6cc4-4041-875f-ec9d0afc1e67",
+      "name": "Telegram Trigger",
+      "webhookId": "a4d0a7dc-1a0d-4c0c-9eeb-9e093bb4d9c1",
+      "credentials": {
+        "telegramApi": {
+          "id": "ih3kpRed4o9ObGAB",
+          "name": "Domain OSINT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "^([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    },
+                    "id": "19afd327-0c23-48e0-86bc-400ca4ac6780"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "WEBSITE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -416,
+        -240
+      ],
+      "id": "ae9d9605-220b-4386-98ff-ce3c488e83d8",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n",
+        "height": 208,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -288
+      ],
+      "id": "f5a357c7-c3da-40af-9b31-4a44b7e37230",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Final Output\n",
+        "height": 416,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -48
+      ],
+      "id": "4b90a290-9d31-43f0-9524-f7c144ab9359",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Domain Information:\n{{ JSON.stringify($json['Domain Information']) }}\n\nSubdomains Information:\n{{ JSON.stringify($json.Subdomains) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "ROLE DEFINITION\n\nYou are a Senior Cybersecurity Intelligence Analyst and OSINT (Open Source Intelligence) Expert. Your task is to process raw JSON data containing domain reconnaissance information and transform it into a professional, executive-level Intelligence Report in Markdown format.\n\nOBJECTIVE\n\nConvert the provided JSON dataset into a structured \"Domain Reconnaissance Report.\" The output must be formatted specifically for conversion to PDF (clean structure, standard fonts compatibility, clear headers).\n\nINPUT DATA\n\nYou will be provided with a JSON object containing:\n\nDomain Information: Registrar data, dates, hosting infrastructure, and email security protocols.\n\nSubdomains: A list of enumerated subdomains with their resolved IPs, CNAME targets, and SSL details.\n\nOUTPUT RULES & CONSTRAINTS\n\nZero Hallucination: You must ONLY use the data provided in the JSON. If a field is \"Redacted\", \"None\", or null, report it exactly as such. Do not infer missing dates or locations.\n\nProfessional Tone: Use an objective, declarative, and analytical tone. Avoid conversational fillers (e.g., \"Here is the data\").\n\nVendor Identification: Analyze CNAME and MX records to identify service providers.\n\nExample: If CNAME points to myshopify.com, explicitly state the vendor is \"Shopify\".\n\nExample: If CNAME points to googlehosted.com, identify it as \"Google Services\".\n\nFormatting for PDF:\n\nUse ## for Section Headers.\n\nUse Standard Markdown Tables for lists (Subdomains).\n\nEnsure tables are not excessively wide (group related columns).\n\nDo not use raw HTML.\n\nREPORT STRUCTURE\n\nOrganize the output in the following order:\n\n1. Executive Summary\n\nSubject: [Domain Name]\n\nOverview: A 2-3 sentence summary of the domain's age, primary hosting provider, and detected ecosystem (e.g., E-commerce via Shopify, Workspace via Google).\n\nRisk Level: Low/Medium/High (Base this only on the malicious_flags count and SSL validity in the JSON).\n\n2. Domain Identity & Registration\n\nCreate a clean layout listing:\n\nRegistrar\n\nCreation Date (Format: YYYY-MM-DD)\n\nExpiration Date (Format: YYYY-MM-DD)\n\nRegistrant Organization (Note if redacted).\n\n3. Infrastructure & Technology Stack\n\nHosting: Identify the Cloud Provider detected in the JSON.\n\nEmail Security: Analyze the SPF record. List authorized third-party senders (e.g., SendGrid, Zoho/Transmail) found in the spf_record or third_party_senders array.\n\nNameservers: List the nameservers.\n\n4. Attack Surface: Subdomain Enumeration\n\nCreate a Markdown Table with the following columns:\n\nSubdomain\n\nIP Address\n\nService/Target (Derived from CNAME, e.g., \"Shopify\", \"Elastic Email\", \"Tribe.so\")\n\nSSL Status (Issuer + Expiry Year)\n\n5. Analyst Notes\n\nBriefly mention any specific observations regarding the infrastructure (e.g., \"The presence of tracking and feedback subdomains indicates active customer engagement monitoring.\").\n\nIMPORTANT PROCESSING INSTRUCTION\n\nIgnore JSON artifacts like \"pairedItem\": { \"item\": 0 }.\n\nDate Parsing: Convert ISO dates (e.g., 2011-04-16T04:41:16.790Z) to readable formats (e.g., April 16, 2011).\n\nIf malicious_flags are 0, explicitly state that no malicious indicators were found."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1184,
+        48
+      ],
+      "id": "77ca3ff9-683f-43a5-a141-5377568ba4b3",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        48
+      ],
+      "id": "926ac124-8454-46a0-a157-d43c2f3314cf",
+      "name": "Send a text message",
+      "webhookId": "414520bb-a29d-435b-8df9-3fe761f1398c",
+      "credentials": {
+        "telegramApi": {
+          "id": "ih3kpRed4o9ObGAB",
+          "name": "Domain OSINT"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "VirusTotal Domain Lookup": {
+      "main": [
+        [
+          {
+            "node": "Set3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Data Array": {
+      "main": [
+        [
+          {
+            "node": "Extract Subdomain Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Context Filter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Context Filter",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Virustotal subdomain lookup": {
+      "main": [
+        [
+          {
+            "node": "Split Data Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Subdomain Info": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initiator 1": {
+      "main": [
+        [
+          {
+            "node": "Virustotal subdomain lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initiator 2": {
+      "main": [
+        [
+          {
+            "node": "VirusTotal Domain Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "ALL Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set3": {
+      "main": [
+        [
+          {
+            "node": "Context Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ALL Records": {
+      "main": [
+        [
+          {
+            "node": "Initiator 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Initiator 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9dba998c-e6e4-43c8-afcb-a7af54de8fc3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "285f38928c3080d4d3004ac255b57beeffa3146f908ff4e25945a9f5309f2e86"
+  },
+  "id": "aP27DLJQ5XE0CK2H",
+  "tags": []
+}

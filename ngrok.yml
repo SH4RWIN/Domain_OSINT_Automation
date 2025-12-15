@@ -4,4 +4,4 @@ tunnels:
     n8n:
         proto: http
         addr: n8n:5678
-        domain: your-ngrok-subdomain-url-here
+        domain: moved-easily-collie.ngrok-free.app
